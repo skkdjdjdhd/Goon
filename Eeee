@@ -1,4 +1,3 @@
---//Vuk
 local MashUI = {}
 MashUI.__index = MashUI
 
@@ -361,7 +360,8 @@ function Window:GetTabMethods()
             currentValue = default,
             callback = nil,
             isOpen = false,
-            listFrame = nil
+            listFrame = nil,
+            inputConnection = nil
         }
         
         function dropdownObj:SetValues(newValues)
@@ -376,6 +376,10 @@ function Window:GetTabMethods()
             if dropdownObj.listFrame then
                 dropdownObj.listFrame:Destroy()
                 dropdownObj.listFrame = nil
+            end
+            if dropdownObj.inputConnection then
+                pcall(function() dropdownObj.inputConnection:Disconnect() end)
+                dropdownObj.inputConnection = nil
             end
             dropdownObj.isOpen = false
             arrow.Text = "▼"
@@ -467,12 +471,22 @@ function Window:GetTabMethods()
             local connection
             connection = UserInputService.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    if dropdownObj.isOpen then
+                    local pos = input.Position
+                    if not pos then return end
+                    local guis = UserInputService:GetGuiObjectsAtPosition(pos.X, pos.Y)
+                    local clickedInside = false
+                    for _, gui in ipairs(guis) do
+                        if gui and (gui:IsDescendantOf(dropdown) or (dropdownObj.listFrame and gui:IsDescendantOf(dropdownObj.listFrame))) then
+                            clickedInside = true
+                            break
+                        end
+                    end
+                    if not clickedInside then
                         closeDropdown()
-                        connection:Disconnect()
                     end
                 end
             end)
+            dropdownObj.inputConnection = connection
         end
         
         dropdown.MouseButton1Click:Connect(openDropdown)
