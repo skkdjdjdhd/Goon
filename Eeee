@@ -53,7 +53,6 @@ function MashUI:CreateWindow(config)
     local subtitle = config.SubTitle or ""
     local size = config.Size or UDim2.fromOffset(500, 400)
     local theme = config.Theme or "Dark"
-    local acrylic = config.Acrylic ~= false
     local minimizeKey = config.MinimizeKey or Enum.KeyCode.Q
     
     window.gui = Instance.new("ScreenGui")
@@ -68,40 +67,29 @@ function MashUI:CreateWindow(config)
     window.main.AnchorPoint = Vector2.new(0.5, 0.5)
     window.main.BackgroundColor3 = theme == "Dark" and Color3.fromRGB(25, 25, 35) or Color3.fromRGB(245, 245, 245)
     window.main.BorderSizePixel = 0
+    window.main.Active = true
+    window.main.Draggable = true
     window.main.Parent = window.gui
     
     local mainCorner = Instance.new("UICorner")
     mainCorner.CornerRadius = UDim.new(0, 12)
     mainCorner.Parent = window.main
     
-    local shadow = Instance.new("ImageLabel")
-    shadow.Name = "Shadow"
-    shadow.Size = UDim2.new(1, 20, 1, 20)
-    shadow.Position = UDim2.new(0, -10, 0, -10)
-    shadow.BackgroundTransparency = 1
-    shadow.Image = "rbxasset://textures/ui/Controls/DropShadow.png"
-    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    shadow.ImageTransparency = 0.5
-    shadow.ScaleType = Enum.ScaleType.Slice
-    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
-    shadow.ZIndex = window.main.ZIndex - 1
-    shadow.Parent = window.main
-    
     window.titleBar = Instance.new("Frame")
     window.titleBar.Name = "TitleBar"
-    window.titleBar.Size = UDim2.new(1, 0, 0, 50)
+    window.titleBar.Size = UDim2.new(1, 0, 0, 60)
     window.titleBar.Position = UDim2.new(0, 0, 0, 0)
     window.titleBar.BackgroundTransparency = 1
     window.titleBar.Parent = window.main
     
     window.titleLabel = Instance.new("TextLabel")
     window.titleLabel.Name = "Title"
-    window.titleLabel.Size = UDim2.new(1, -100, 0, 25)
+    window.titleLabel.Size = UDim2.new(1, -100, 0, 30)
     window.titleLabel.Position = UDim2.new(0, 20, 0, 8)
     window.titleLabel.BackgroundTransparency = 1
     window.titleLabel.Text = title
     window.titleLabel.TextColor3 = theme == "Dark" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(0, 0, 0)
-    window.titleLabel.TextScaled = true
+    window.titleLabel.TextSize = 18
     window.titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     window.titleLabel.Font = Enum.Font.GothamBold
     window.titleLabel.Parent = window.titleBar
@@ -109,12 +97,12 @@ function MashUI:CreateWindow(config)
     if subtitle ~= "" then
         window.subtitleLabel = Instance.new("TextLabel")
         window.subtitleLabel.Name = "Subtitle"
-        window.subtitleLabel.Size = UDim2.new(1, -100, 0, 15)
-        window.subtitleLabel.Position = UDim2.new(0, 20, 0, 28)
+        window.subtitleLabel.Size = UDim2.new(1, -100, 0, 18)
+        window.subtitleLabel.Position = UDim2.new(0, 20, 0, 35)
         window.subtitleLabel.BackgroundTransparency = 1
         window.subtitleLabel.Text = subtitle
         window.subtitleLabel.TextColor3 = theme == "Dark" and Color3.fromRGB(180, 180, 180) or Color3.fromRGB(100, 100, 100)
-        window.subtitleLabel.TextScaled = true
+        window.subtitleLabel.TextSize = 14
         window.subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
         window.subtitleLabel.Font = Enum.Font.Gotham
         window.subtitleLabel.Parent = window.titleBar
@@ -122,13 +110,13 @@ function MashUI:CreateWindow(config)
     
     window.closeButton = Instance.new("TextButton")
     window.closeButton.Name = "CloseButton"
-    window.closeButton.Size = UDim2.new(0, 30, 0, 30)
-    window.closeButton.Position = UDim2.new(1, -40, 0, 10)
+    window.closeButton.Size = UDim2.new(0, 40, 0, 40)
+    window.closeButton.Position = UDim2.new(1, -50, 0, 10)
     window.closeButton.BackgroundColor3 = Color3.fromRGB(255, 95, 87)
     window.closeButton.BorderSizePixel = 0
     window.closeButton.Text = "×"
     window.closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    window.closeButton.TextScaled = true
+    window.closeButton.TextSize = 24
     window.closeButton.Font = Enum.Font.GothamBold
     window.closeButton.Parent = window.titleBar
     
@@ -138,8 +126,8 @@ function MashUI:CreateWindow(config)
     
     window.tabContainer = Instance.new("Frame")
     window.tabContainer.Name = "TabContainer"
-    window.tabContainer.Size = UDim2.new(1, 0, 1, -50)
-    window.tabContainer.Position = UDim2.new(0, 0, 0, 50)
+    window.tabContainer.Size = UDim2.new(1, 0, 1, -60)
+    window.tabContainer.Position = UDim2.new(0, 0, 0, 60)
     window.tabContainer.BackgroundTransparency = 1
     window.tabContainer.Parent = window.main
     
@@ -149,9 +137,10 @@ function MashUI:CreateWindow(config)
     window.tabBar.Position = UDim2.new(0, 0, 0, 0)
     window.tabBar.BackgroundColor3 = theme == "Dark" and Color3.fromRGB(20, 20, 30) or Color3.fromRGB(240, 240, 240)
     window.tabBar.BorderSizePixel = 0
-    window.tabBar.ScrollBarThickness = 4
+    window.tabBar.ScrollBarThickness = 8
     window.tabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
     window.tabBar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    window.tabBar.ScrollingEnabled = true
     window.tabBar.Parent = window.tabContainer
     
     local tabBarCorner = Instance.new("UICorner")
@@ -160,14 +149,14 @@ function MashUI:CreateWindow(config)
     
     local tabBarLayout = Instance.new("UIListLayout")
     tabBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    tabBarLayout.Padding = UDim.new(0, 5)
+    tabBarLayout.Padding = UDim.new(0, 8)
     tabBarLayout.Parent = window.tabBar
     
     local tabBarPadding = Instance.new("UIPadding")
-    tabBarPadding.PaddingTop = UDim.new(0, 10)
-    tabBarPadding.PaddingBottom = UDim.new(0, 10)
-    tabBarPadding.PaddingLeft = UDim.new(0, 10)
-    tabBarPadding.PaddingRight = UDim.new(0, 10)
+    tabBarPadding.PaddingTop = UDim.new(0, 15)
+    tabBarPadding.PaddingBottom = UDim.new(0, 15)
+    tabBarPadding.PaddingLeft = UDim.new(0, 15)
+    tabBarPadding.PaddingRight = UDim.new(0, 15)
     tabBarPadding.Parent = window.tabBar
     
     window.contentArea = Instance.new("Frame")
@@ -183,32 +172,11 @@ function MashUI:CreateWindow(config)
     window.isMinimized = false
     window.originalSize = size
     
-    local dragging = false
-    local dragStart = nil
-    local startPos = nil
-    
-    window.titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = window.main.Position
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            window.main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    
     window.closeButton.MouseButton1Click:Connect(function()
+        window:Destroy()
+    end)
+    
+    window.closeButton.TouchTap:Connect(function()
         window:Destroy()
     end)
     
@@ -236,12 +204,12 @@ function Window:CreateTab(config)
     
     tab.button = Instance.new("TextButton")
     tab.button.Name = title .. "Tab"
-    tab.button.Size = UDim2.new(1, 0, 0, 40)
+    tab.button.Size = UDim2.new(1, 0, 0, 50)
     tab.button.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
     tab.button.BorderSizePixel = 0
     tab.button.Text = "  " .. title
     tab.button.TextColor3 = Color3.fromRGB(200, 200, 200)
-    tab.button.TextScaled = true
+    tab.button.TextSize = 16
     tab.button.TextXAlignment = Enum.TextXAlignment.Left
     tab.button.Font = Enum.Font.Gotham
     tab.button.Parent = self.tabBar
@@ -256,25 +224,30 @@ function Window:CreateTab(config)
     tab.content.Position = UDim2.new(0, 0, 0, 0)
     tab.content.BackgroundTransparency = 1
     tab.content.BorderSizePixel = 0
-    tab.content.ScrollBarThickness = 6
+    tab.content.ScrollBarThickness = 10
     tab.content.CanvasSize = UDim2.new(0, 0, 0, 0)
     tab.content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    tab.content.ScrollingEnabled = true
     tab.content.Visible = false
     tab.content.Parent = self.contentArea
     
     local contentLayout = Instance.new("UIListLayout")
     contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Padding = UDim.new(0, 10)
+    contentLayout.Padding = UDim.new(0, 15)
     contentLayout.Parent = tab.content
     
     local contentPadding = Instance.new("UIPadding")
-    contentPadding.PaddingTop = UDim.new(0, 15)
-    contentPadding.PaddingBottom = UDim.new(0, 15)
-    contentPadding.PaddingLeft = UDim.new(0, 15)
-    contentPadding.PaddingRight = UDim.new(0, 15)
+    contentPadding.PaddingTop = UDim.new(0, 20)
+    contentPadding.PaddingBottom = UDim.new(0, 20)
+    contentPadding.PaddingLeft = UDim.new(0, 20)
+    contentPadding.PaddingRight = UDim.new(0, 20)
     contentPadding.Parent = tab.content
     
     tab.button.MouseButton1Click:Connect(function()
+        self:SelectTab(tab)
+    end)
+    
+    tab.button.TouchTap:Connect(function()
         self:SelectTab(tab)
     end)
     
@@ -298,18 +271,18 @@ function Window:GetTabMethods()
         
         local buttonFrame = Instance.new("Frame")
         buttonFrame.Name = title .. "ButtonFrame"
-        buttonFrame.Size = UDim2.new(1, 0, 0, description ~= "" and 60 or 40)
+        buttonFrame.Size = UDim2.new(1, 0, 0, description ~= "" and 80 or 55)
         buttonFrame.BackgroundTransparency = 1
         buttonFrame.Parent = self.content
         
         local button = Instance.new("TextButton")
         button.Name = title .. "Button"
-        button.Size = UDim2.new(1, 0, 1, 0)
+        button.Size = UDim2.new(1, 0, 0, 50)
         button.BackgroundColor3 = Color3.fromRGB(50, 120, 200)
         button.BorderSizePixel = 0
         button.Text = title
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextScaled = true
+        button.TextSize = 16
         button.Font = Enum.Font.GothamMedium
         button.Parent = buttonFrame
         
@@ -318,21 +291,22 @@ function Window:GetTabMethods()
         buttonCorner.Parent = button
         
         if description ~= "" then
-            button.Size = UDim2.new(1, 0, 0, 35)
-            
             local desc = Instance.new("TextLabel")
-            desc.Size = UDim2.new(1, 0, 0, 20)
-            desc.Position = UDim2.new(0, 0, 1, -20)
+            desc.Size = UDim2.new(1, 0, 0, 25)
+            desc.Position = UDim2.new(0, 0, 0, 55)
             desc.BackgroundTransparency = 1
             desc.Text = description
             desc.TextColor3 = Color3.fromRGB(150, 150, 150)
-            desc.TextScaled = true
+            desc.TextSize = 13
             desc.Font = Enum.Font.Gotham
             desc.Parent = buttonFrame
         end
         
         button.MouseButton1Click:Connect(function()
-            rippleEffect(button, UserInputService:GetMouseLocation())
+            callback()
+        end)
+        
+        button.TouchTap:Connect(function()
             callback()
         end)
         
@@ -344,34 +318,34 @@ function Window:GetTabMethods()
         local title = config.Title or "Dropdown"
         local values = config.Values or {}
         local default = config.Default or ""
-        local multi = config.Multi or false
         
         local dropdownFrame = Instance.new("Frame")
         dropdownFrame.Name = title .. "DropdownFrame"
-        dropdownFrame.Size = UDim2.new(1, 0, 0, 70)
+        dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
         dropdownFrame.BackgroundTransparency = 1
         dropdownFrame.Parent = self.content
         
         local titleLabel = Instance.new("TextLabel")
-        titleLabel.Size = UDim2.new(1, 0, 0, 25)
+        titleLabel.Size = UDim2.new(1, 0, 0, 30)
         titleLabel.BackgroundTransparency = 1
         titleLabel.Text = title
         titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        titleLabel.TextScaled = true
+        titleLabel.TextSize = 16
         titleLabel.TextXAlignment = Enum.TextXAlignment.Left
         titleLabel.Font = Enum.Font.GothamMedium
         titleLabel.Parent = dropdownFrame
         
         local dropdown = Instance.new("TextButton")
-        dropdown.Size = UDim2.new(1, 0, 0, 35)
-        dropdown.Position = UDim2.new(0, 0, 0, 30)
+        dropdown.Size = UDim2.new(1, 0, 0, 50)
+        dropdown.Position = UDim2.new(0, 0, 0, 35)
         dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
         dropdown.BorderSizePixel = 0
         dropdown.Text = default ~= "" and default or "Select..."
         dropdown.TextColor3 = Color3.fromRGB(200, 200, 200)
-        dropdown.TextScaled = true
+        dropdown.TextSize = 15
         dropdown.TextXAlignment = Enum.TextXAlignment.Left
         dropdown.Font = Enum.Font.Gotham
+        dropdown.ClipsDescendants = false
         dropdown.Parent = dropdownFrame
         
         local dropdownCorner = Instance.new("UICorner")
@@ -379,17 +353,17 @@ function Window:GetTabMethods()
         dropdownCorner.Parent = dropdown
         
         local dropdownPadding = Instance.new("UIPadding")
-        dropdownPadding.PaddingLeft = UDim.new(0, 10)
-        dropdownPadding.PaddingRight = UDim.new(0, 30)
+        dropdownPadding.PaddingLeft = UDim.new(0, 15)
+        dropdownPadding.PaddingRight = UDim.new(0, 40)
         dropdownPadding.Parent = dropdown
         
         local arrow = Instance.new("TextLabel")
-        arrow.Size = UDim2.new(0, 20, 1, 0)
-        arrow.Position = UDim2.new(1, -25, 0, 0)
+        arrow.Size = UDim2.new(0, 30, 1, 0)
+        arrow.Position = UDim2.new(1, -35, 0, 0)
         arrow.BackgroundTransparency = 1
         arrow.Text = "▼"
         arrow.TextColor3 = Color3.fromRGB(200, 200, 200)
-        arrow.TextScaled = true
+        arrow.TextSize = 14
         arrow.Font = Enum.Font.Gotham
         arrow.Parent = dropdown
         
@@ -408,17 +382,26 @@ function Window:GetTabMethods()
             self.callback = callback
         end
         
-        dropdown.MouseButton1Click:Connect(function()
+        local function openDropdown()
             if dropdownObj.isOpen then return end
+            if #dropdownObj.values == 0 then return end
             
             dropdownObj.isOpen = true
+            arrow.Text = "▲"
+            
+            local itemHeight = 45
+            local maxItems = 6
+            local listHeight = math.min(#dropdownObj.values * itemHeight, maxItems * itemHeight)
+            
+            dropdownFrame.Size = UDim2.new(1, 0, 0, 90 + listHeight)
             
             local listFrame = Instance.new("Frame")
-            listFrame.Size = UDim2.new(1, 0, 0, math.min(#values * 30, 150))
-            listFrame.Position = UDim2.new(0, 0, 1, 5)
+            listFrame.Name = "DropdownList"
+            listFrame.Size = UDim2.new(1, 0, 0, listHeight)
+            listFrame.Position = UDim2.new(0, 0, 0, 55)
             listFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
             listFrame.BorderSizePixel = 0
-            listFrame.ZIndex = 10
+            listFrame.ZIndex = 100
             listFrame.Parent = dropdown
             
             local listCorner = Instance.new("UICorner")
@@ -428,24 +411,26 @@ function Window:GetTabMethods()
             local scrollFrame = Instance.new("ScrollingFrame")
             scrollFrame.Size = UDim2.new(1, 0, 1, 0)
             scrollFrame.BackgroundTransparency = 1
-            scrollFrame.ScrollBarThickness = 4
-            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, #values * 30)
+            scrollFrame.ScrollBarThickness = 8
+            scrollFrame.CanvasSize = UDim2.new(0, 0, 0, #dropdownObj.values * itemHeight)
+            scrollFrame.ScrollingEnabled = true
             scrollFrame.Parent = listFrame
             
             local layout = Instance.new("UIListLayout")
             layout.SortOrder = Enum.SortOrder.LayoutOrder
             layout.Parent = scrollFrame
             
-            for _, value in ipairs(values) do
+            for i, value in ipairs(dropdownObj.values) do
                 local option = Instance.new("TextButton")
-                option.Size = UDim2.new(1, 0, 0, 30)
+                option.Size = UDim2.new(1, 0, 0, itemHeight)
                 option.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
                 option.BorderSizePixel = 0
                 option.Text = "  " .. tostring(value)
                 option.TextColor3 = Color3.fromRGB(200, 200, 200)
-                option.TextScaled = true
+                option.TextSize = 15
                 option.TextXAlignment = Enum.TextXAlignment.Left
                 option.Font = Enum.Font.Gotham
+                option.LayoutOrder = i
                 option.Parent = scrollFrame
                 
                 option.MouseEnter:Connect(function()
@@ -456,33 +441,51 @@ function Window:GetTabMethods()
                     option.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
                 end)
                 
-                option.MouseButton1Click:Connect(function()
+                local function selectOption()
                     dropdown.Text = tostring(value)
                     dropdownObj.currentValue = value
                     if dropdownObj.callback then
                         dropdownObj.callback(value)
                     end
-                    listFrame:Destroy()
+                    
                     dropdownObj.isOpen = false
-                end)
+                    arrow.Text = "▼"
+                    dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
+                    listFrame:Destroy()
+                end
+                
+                option.MouseButton1Click:Connect(selectOption)
+                option.TouchTap:Connect(selectOption)
             end
             
             local closeConnection
             closeConnection = UserInputService.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    local mouse = UserInputService:GetMouseLocation()
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    local inputPos = input.Position
                     local framePos = listFrame.AbsolutePosition
                     local frameSize = listFrame.AbsoluteSize
+                    local dropdownPos = dropdown.AbsolutePosition
+                    local dropdownSize = dropdown.AbsoluteSize
                     
-                    if mouse.X < framePos.X or mouse.X > framePos.X + frameSize.X or
-                       mouse.Y < framePos.Y or mouse.Y > framePos.Y + frameSize.Y then
-                        listFrame:Destroy()
+                    local inDropdown = inputPos.X >= dropdownPos.X and inputPos.X <= dropdownPos.X + dropdownSize.X and
+                                     inputPos.Y >= dropdownPos.Y and inputPos.Y <= dropdownPos.Y + dropdownSize.Y
+                    
+                    local inList = inputPos.X >= framePos.X and inputPos.X <= framePos.X + frameSize.X and
+                                  inputPos.Y >= framePos.Y and inputPos.Y <= framePos.Y + frameSize.Y
+                    
+                    if not inDropdown and not inList then
                         dropdownObj.isOpen = false
+                        arrow.Text = "▼"
+                        dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
+                        listFrame:Destroy()
                         closeConnection:Disconnect()
                     end
                 end
             end)
-        end)
+        end
+        
+        dropdown.MouseButton1Click:Connect(openDropdown)
+        dropdown.TouchTap:Connect(openDropdown)
         
         return dropdownObj
     end
@@ -514,7 +517,7 @@ end
 function Window:ToggleMinimize()
     self.isMinimized = not self.isMinimized
     
-    local targetSize = self.isMinimized and UDim2.fromOffset(self.originalSize.X.Offset, 50) or self.originalSize
+    local targetSize = self.isMinimized and UDim2.fromOffset(self.originalSize.X.Offset, 60) or self.originalSize
     
     local tween = createTween(self.main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
         Size = targetSize
