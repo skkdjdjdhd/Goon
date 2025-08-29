@@ -13,35 +13,6 @@ local function createTween(object, info, properties)
     return TweenService:Create(object, info, properties)
 end
 
-local function rippleEffect(button, position)
-    local ripple = Instance.new("Frame")
-    ripple.Name = "Ripple"
-    ripple.Size = UDim2.new(0, 0, 0, 0)
-    ripple.Position = UDim2.new(0, position.X - button.AbsolutePosition.X, 0, position.Y - button.AbsolutePosition.Y)
-    ripple.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ripple.BackgroundTransparency = 0.8
-    ripple.BorderSizePixel = 0
-    ripple.ZIndex = button.ZIndex + 1
-    ripple.Parent = button
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = ripple
-    
-    local maxSize = math.max(button.AbsoluteSize.X, button.AbsoluteSize.Y) * 2
-    
-    local expandTween = createTween(ripple, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Size = UDim2.new(0, maxSize, 0, maxSize),
-        Position = UDim2.new(0, position.X - button.AbsolutePosition.X - maxSize/2, 0, position.Y - button.AbsolutePosition.Y - maxSize/2),
-        BackgroundTransparency = 1
-    })
-    
-    expandTween:Play()
-    expandTween.Completed:Connect(function()
-        ripple:Destroy()
-    end)
-end
-
 local Window = {}
 Window.__index = Window
 
@@ -58,6 +29,7 @@ function MashUI:CreateWindow(config)
     window.gui = Instance.new("ScreenGui")
     window.gui.Name = "MashUI_" .. title
     window.gui.ResetOnSpawn = false
+    window.gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     window.gui.Parent = playerGui
     
     window.main = Instance.new("Frame")
@@ -69,6 +41,7 @@ function MashUI:CreateWindow(config)
     window.main.BorderSizePixel = 0
     window.main.Active = true
     window.main.Draggable = true
+    window.main.ZIndex = 1
     window.main.Parent = window.gui
     
     local mainCorner = Instance.new("UICorner")
@@ -80,6 +53,7 @@ function MashUI:CreateWindow(config)
     window.titleBar.Size = UDim2.new(1, 0, 0, 60)
     window.titleBar.Position = UDim2.new(0, 0, 0, 0)
     window.titleBar.BackgroundTransparency = 1
+    window.titleBar.ZIndex = 2
     window.titleBar.Parent = window.main
     
     window.titleLabel = Instance.new("TextLabel")
@@ -92,6 +66,7 @@ function MashUI:CreateWindow(config)
     window.titleLabel.TextSize = 18
     window.titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     window.titleLabel.Font = Enum.Font.GothamBold
+    window.titleLabel.ZIndex = 3
     window.titleLabel.Parent = window.titleBar
     
     if subtitle ~= "" then
@@ -105,6 +80,7 @@ function MashUI:CreateWindow(config)
         window.subtitleLabel.TextSize = 14
         window.subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
         window.subtitleLabel.Font = Enum.Font.Gotham
+        window.subtitleLabel.ZIndex = 3
         window.subtitleLabel.Parent = window.titleBar
     end
     
@@ -118,6 +94,7 @@ function MashUI:CreateWindow(config)
     window.closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     window.closeButton.TextSize = 24
     window.closeButton.Font = Enum.Font.GothamBold
+    window.closeButton.ZIndex = 3
     window.closeButton.Parent = window.titleBar
     
     local closeCorner = Instance.new("UICorner")
@@ -129,6 +106,7 @@ function MashUI:CreateWindow(config)
     window.tabContainer.Size = UDim2.new(1, 0, 1, -60)
     window.tabContainer.Position = UDim2.new(0, 0, 0, 60)
     window.tabContainer.BackgroundTransparency = 1
+    window.tabContainer.ZIndex = 2
     window.tabContainer.Parent = window.main
     
     window.tabBar = Instance.new("ScrollingFrame")
@@ -141,6 +119,7 @@ function MashUI:CreateWindow(config)
     window.tabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
     window.tabBar.AutomaticCanvasSize = Enum.AutomaticSize.Y
     window.tabBar.ScrollingEnabled = true
+    window.tabBar.ZIndex = 3
     window.tabBar.Parent = window.tabContainer
     
     local tabBarCorner = Instance.new("UICorner")
@@ -164,6 +143,7 @@ function MashUI:CreateWindow(config)
     window.contentArea.Size = UDim2.new(1, -170, 1, 0)
     window.contentArea.Position = UDim2.new(0, 170, 0, 0)
     window.contentArea.BackgroundTransparency = 1
+    window.contentArea.ZIndex = 3
     window.contentArea.Parent = window.tabContainer
     
     window.tabs = {}
@@ -212,6 +192,7 @@ function Window:CreateTab(config)
     tab.button.TextSize = 16
     tab.button.TextXAlignment = Enum.TextXAlignment.Left
     tab.button.Font = Enum.Font.Gotham
+    tab.button.ZIndex = 4
     tab.button.Parent = self.tabBar
     
     local tabCorner = Instance.new("UICorner")
@@ -229,6 +210,7 @@ function Window:CreateTab(config)
     tab.content.AutomaticCanvasSize = Enum.AutomaticSize.Y
     tab.content.ScrollingEnabled = true
     tab.content.Visible = false
+    tab.content.ZIndex = 4
     tab.content.Parent = self.contentArea
     
     local contentLayout = Instance.new("UIListLayout")
@@ -273,6 +255,7 @@ function Window:GetTabMethods()
         buttonFrame.Name = title .. "ButtonFrame"
         buttonFrame.Size = UDim2.new(1, 0, 0, description ~= "" and 80 or 55)
         buttonFrame.BackgroundTransparency = 1
+        buttonFrame.ZIndex = 5
         buttonFrame.Parent = self.content
         
         local button = Instance.new("TextButton")
@@ -284,6 +267,7 @@ function Window:GetTabMethods()
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
         button.TextSize = 16
         button.Font = Enum.Font.GothamMedium
+        button.ZIndex = 6
         button.Parent = buttonFrame
         
         local buttonCorner = Instance.new("UICorner")
@@ -299,6 +283,7 @@ function Window:GetTabMethods()
             desc.TextColor3 = Color3.fromRGB(150, 150, 150)
             desc.TextSize = 13
             desc.Font = Enum.Font.Gotham
+            desc.ZIndex = 6
             desc.Parent = buttonFrame
         end
         
@@ -323,6 +308,7 @@ function Window:GetTabMethods()
         dropdownFrame.Name = title .. "DropdownFrame"
         dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
         dropdownFrame.BackgroundTransparency = 1
+        dropdownFrame.ZIndex = 5
         dropdownFrame.Parent = self.content
         
         local titleLabel = Instance.new("TextLabel")
@@ -333,6 +319,7 @@ function Window:GetTabMethods()
         titleLabel.TextSize = 16
         titleLabel.TextXAlignment = Enum.TextXAlignment.Left
         titleLabel.Font = Enum.Font.GothamMedium
+        titleLabel.ZIndex = 6
         titleLabel.Parent = dropdownFrame
         
         local dropdown = Instance.new("TextButton")
@@ -346,6 +333,7 @@ function Window:GetTabMethods()
         dropdown.TextXAlignment = Enum.TextXAlignment.Left
         dropdown.Font = Enum.Font.Gotham
         dropdown.ClipsDescendants = false
+        dropdown.ZIndex = 6
         dropdown.Parent = dropdownFrame
         
         local dropdownCorner = Instance.new("UICorner")
@@ -365,13 +353,15 @@ function Window:GetTabMethods()
         arrow.TextColor3 = Color3.fromRGB(200, 200, 200)
         arrow.TextSize = 14
         arrow.Font = Enum.Font.Gotham
+        arrow.ZIndex = 7
         arrow.Parent = dropdown
         
         local dropdownObj = {
             values = values,
             currentValue = default,
             callback = nil,
-            isOpen = false
+            isOpen = false,
+            listFrame = nil
         }
         
         function dropdownObj:SetValues(newValues)
@@ -382,14 +372,14 @@ function Window:GetTabMethods()
             self.callback = callback
         end
         
-        local function closeDropdown(listFrame)
-            if not dropdownObj.isOpen then return end
+        local function closeDropdown()
+            if dropdownObj.listFrame then
+                dropdownObj.listFrame:Destroy()
+                dropdownObj.listFrame = nil
+            end
             dropdownObj.isOpen = false
             arrow.Text = "▼"
             dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
-            if listFrame and listFrame.Parent then
-                listFrame:Destroy()
-            end
         end
         
         local function openDropdown()
@@ -404,30 +394,34 @@ function Window:GetTabMethods()
             
             local itemHeight = 45
             local maxItems = 6
-            local listHeight = math.min(#dropdownObj.values * itemHeight, maxItems * itemHeight)
+            local actualItems = math.min(#dropdownObj.values, maxItems)
+            local listHeight = actualItems * itemHeight
             
             dropdownFrame.Size = UDim2.new(1, 0, 0, 90 + listHeight)
             
-            local listFrame = Instance.new("Frame")
-            listFrame.Name = "DropdownList"
-            listFrame.Size = UDim2.new(1, 0, 0, listHeight)
-            listFrame.Position = UDim2.new(0, 0, 0, 55)
-            listFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-            listFrame.BorderSizePixel = 0
-            listFrame.ZIndex = 100
-            listFrame.Parent = dropdown
+            dropdownObj.listFrame = Instance.new("Frame")
+            dropdownObj.listFrame.Name = "DropdownList"
+            dropdownObj.listFrame.Size = UDim2.new(1, 0, 0, listHeight)
+            dropdownObj.listFrame.Position = UDim2.new(0, 0, 0, 55)
+            dropdownObj.listFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            dropdownObj.listFrame.BorderSizePixel = 0
+            dropdownObj.listFrame.ZIndex = 100
+            dropdownObj.listFrame.Active = true
+            dropdownObj.listFrame.Parent = dropdown
             
             local listCorner = Instance.new("UICorner")
             listCorner.CornerRadius = UDim.new(0, 6)
-            listCorner.Parent = listFrame
+            listCorner.Parent = dropdownObj.listFrame
             
             local scrollFrame = Instance.new("ScrollingFrame")
             scrollFrame.Size = UDim2.new(1, 0, 1, 0)
             scrollFrame.BackgroundTransparency = 1
             scrollFrame.ScrollBarThickness = 8
             scrollFrame.CanvasSize = UDim2.new(0, 0, 0, #dropdownObj.values * itemHeight)
-            scrollFrame.ScrollingEnabled = true
-            scrollFrame.Parent = listFrame
+            scrollFrame.ScrollingEnabled = #dropdownObj.values > maxItems
+            scrollFrame.ZIndex = 101
+            scrollFrame.Active = true
+            scrollFrame.Parent = dropdownObj.listFrame
             
             local layout = Instance.new("UIListLayout")
             layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -444,6 +438,8 @@ function Window:GetTabMethods()
                 option.TextXAlignment = Enum.TextXAlignment.Left
                 option.Font = Enum.Font.Gotham
                 option.LayoutOrder = i
+                option.ZIndex = 102
+                option.Active = true
                 option.Parent = scrollFrame
                 
                 option.MouseEnter:Connect(function()
@@ -460,25 +456,22 @@ function Window:GetTabMethods()
                     if dropdownObj.callback then
                         dropdownObj.callback(value)
                     end
-                    closeDropdown(listFrame)
+                    closeDropdown()
                 end
                 
                 option.MouseButton1Click:Connect(selectOption)
                 option.TouchTap:Connect(selectOption)
             end
             
-            task.spawn(function()
-                task.wait()
-                local closeConnection
-                closeConnection = UserInputService.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        task.wait()
-                        if dropdownObj.isOpen then
-                            closeDropdown(listFrame)
-                            closeConnection:Disconnect()
-                        end
+            task.wait(0.1)
+            local connection
+            connection = UserInputService.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    if dropdownObj.isOpen then
+                        closeDropdown()
+                        connection:Disconnect()
                     end
-                end)
+                end
             end)
         end
         
