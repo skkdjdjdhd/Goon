@@ -382,8 +382,21 @@ function Window:GetTabMethods()
             self.callback = callback
         end
         
+        local function closeDropdown(listFrame)
+            if not dropdownObj.isOpen then return end
+            dropdownObj.isOpen = false
+            arrow.Text = "▼"
+            dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
+            if listFrame and listFrame.Parent then
+                listFrame:Destroy()
+            end
+        end
+        
         local function openDropdown()
-            if dropdownObj.isOpen then return end
+            if dropdownObj.isOpen then 
+                closeDropdown()
+                return 
+            end
             if #dropdownObj.values == 0 then return end
             
             dropdownObj.isOpen = true
@@ -447,40 +460,25 @@ function Window:GetTabMethods()
                     if dropdownObj.callback then
                         dropdownObj.callback(value)
                     end
-                    
-                    dropdownObj.isOpen = false
-                    arrow.Text = "▼"
-                    dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
-                    listFrame:Destroy()
+                    closeDropdown(listFrame)
                 end
                 
                 option.MouseButton1Click:Connect(selectOption)
                 option.TouchTap:Connect(selectOption)
             end
             
-            local closeConnection
-            closeConnection = UserInputService.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local inputPos = input.Position
-                    local framePos = listFrame.AbsolutePosition
-                    local frameSize = listFrame.AbsoluteSize
-                    local dropdownPos = dropdown.AbsolutePosition
-                    local dropdownSize = dropdown.AbsoluteSize
-                    
-                    local inDropdown = inputPos.X >= dropdownPos.X and inputPos.X <= dropdownPos.X + dropdownSize.X and
-                                     inputPos.Y >= dropdownPos.Y and inputPos.Y <= dropdownPos.Y + dropdownSize.Y
-                    
-                    local inList = inputPos.X >= framePos.X and inputPos.X <= framePos.X + frameSize.X and
-                                  inputPos.Y >= framePos.Y and inputPos.Y <= framePos.Y + frameSize.Y
-                    
-                    if not inDropdown and not inList then
-                        dropdownObj.isOpen = false
-                        arrow.Text = "▼"
-                        dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
-                        listFrame:Destroy()
-                        closeConnection:Disconnect()
+            task.spawn(function()
+                task.wait()
+                local closeConnection
+                closeConnection = UserInputService.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        task.wait()
+                        if dropdownObj.isOpen then
+                            closeDropdown(listFrame)
+                            closeConnection:Disconnect()
+                        end
                     end
-                end
+                end)
             end)
         end
         
