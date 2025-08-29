@@ -1,3 +1,4 @@
+--//Vuk
 local MashUI = {}
 MashUI.__index = MashUI
 
@@ -467,30 +468,45 @@ function Window:GetTabMethods()
                 option.TouchTap:Connect(selectOption)
             end
             
-            task.wait(0.1)
-            local connection
-            connection = UserInputService.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local pos = input.Position
-                    if not pos then return end
-                    local guis = UserInputService:GetGuiObjectsAtPosition(pos.X, pos.Y)
-                    local clickedInside = false
-                    for _, gui in ipairs(guis) do
-                        if gui and (gui:IsDescendantOf(dropdown) or (dropdownObj.listFrame and gui:IsDescendantOf(dropdownObj.listFrame))) then
-                            clickedInside = true
-                            break
-                        end
-                    end
-                    if not clickedInside then
-                        closeDropdown()
+            if dropdownObj.inputConnection then
+                pcall(function() dropdownObj.inputConnection:Disconnect() end)
+                dropdownObj.inputConnection = nil
+            end
+            
+            local ignoreNextClick = true
+            dropdownObj.inputConnection = UserInputService.InputBegan:Connect(function(input)
+                if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                    return
+                end
+                if ignoreNextClick then
+                    ignoreNextClick = false
+                    return
+                end
+                local pos = input.Position
+                if not pos then return end
+                local guis = UserInputService:GetGuiObjectsAtPosition(pos.X, pos.Y)
+                local clickedInside = false
+                for _, gui in ipairs(guis) do
+                    if gui and (gui:IsDescendantOf(dropdown) or (dropdownObj.listFrame and gui:IsDescendantOf(dropdownObj.listFrame))) then
+                        clickedInside = true
+                        break
                     end
                 end
+                if not clickedInside then
+                    closeDropdown()
+                end
             end)
-            dropdownObj.inputConnection = connection
+            task.defer(function() ignoreNextClick = false end)
         end
         
-        dropdown.MouseButton1Click:Connect(openDropdown)
-        dropdown.TouchTap:Connect(openDropdown)
+        dropdown.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                openDropdown()
+            end
+        end)
+        dropdown.TouchTap:Connect(function()
+            openDropdown()
+        end)
         
         return dropdownObj
     end
