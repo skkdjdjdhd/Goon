@@ -362,7 +362,8 @@ function Window:GetTabMethods()
             callback = nil,
             isOpen = false,
             listFrame = nil,
-            inputConnection = nil
+            inputConnection = nil,
+            lastOpenInput = nil
         }
         
         function dropdownObj:SetValues(newValues)
@@ -383,11 +384,12 @@ function Window:GetTabMethods()
                 dropdownObj.inputConnection = nil
             end
             dropdownObj.isOpen = false
+            dropdownObj.lastOpenInput = nil
             arrow.Text = "▼"
             dropdownFrame.Size = UDim2.new(1, 0, 0, 90)
         end
         
-        local function openDropdown()
+        local function openDropdown(openingInput)
             if dropdownObj.isOpen then 
                 closeDropdown()
                 return 
@@ -395,6 +397,7 @@ function Window:GetTabMethods()
             if #dropdownObj.values == 0 then return end
             
             dropdownObj.isOpen = true
+            dropdownObj.lastOpenInput = openingInput
             arrow.Text = "▲"
             
             local itemHeight = 45
@@ -473,13 +476,12 @@ function Window:GetTabMethods()
                 dropdownObj.inputConnection = nil
             end
             
-            local ignoreNextClick = true
             dropdownObj.inputConnection = UserInputService.InputBegan:Connect(function(input)
                 if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
                     return
                 end
-                if ignoreNextClick then
-                    ignoreNextClick = false
+                if dropdownObj.lastOpenInput and input == dropdownObj.lastOpenInput then
+                    dropdownObj.lastOpenInput = nil
                     return
                 end
                 local pos = input.Position
@@ -496,12 +498,11 @@ function Window:GetTabMethods()
                     closeDropdown()
                 end
             end)
-            task.defer(function() ignoreNextClick = false end)
         end
         
         dropdown.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                openDropdown()
+                openDropdown(input)
             end
         end)
         dropdown.TouchTap:Connect(function()
