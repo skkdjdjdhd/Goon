@@ -1,5 +1,3 @@
-Hey can you check and see if my library has refresh dropdwon similar like that to it??
-
 --// library script private
 
 local UserInputService = game:GetService('UserInputService')
