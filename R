@@ -791,19 +791,20 @@ end)
     self.section = options.section or "left"
 
     local section = self.section == "left" and left_section
-
+-- and here
     local inputButton = Instance.new("TextButton")
-    inputButton.Name = "Input"
-    inputButton.BackgroundColor3 = Color3.fromRGB(27, 28, 33)
-    inputButton.BorderSizePixel = 0
-    inputButton.Position = UDim2.new(0.02, 0, 0, 37)
-    inputButton.Size = UDim2.new(0.96, 0, 0, 50)
-    inputButton.AutoButtonColor = false
-    inputButton.Font = Enum.Font.SourceSans
-    inputButton.Text = ""
-    inputButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    inputButton.TextSize = 14
-    inputButton.Parent = section
+inputButton.Name = "Input"
+inputButton.BackgroundColor3 = Color3.fromRGB(27, 28, 33)
+inputButton.BorderSizePixel = 0
+inputButton.Position = UDim2.new(0.02, 0, 0, 37)
+inputButton.Size = UDim2.new(0.96, 0, 0, 50)
+inputButton.AutoButtonColor = false
+inputButton.Active = true
+inputButton.Font = Enum.Font.SourceSans
+inputButton.Text = ""
+inputButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+inputButton.TextSize = 14
+inputButton.Parent = section
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 10)
@@ -821,34 +822,39 @@ end)
     TextLabel.TextWrapped = true
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.Text = self.name
-
+-- and here
     local TextBox = Instance.new("TextBox")
-    TextBox.Name = "InputBox"
-    TextBox.Parent = inputButton
-    TextBox.AnchorPoint = Vector2.new(1, 0.5)
-    TextBox.BackgroundColor3 = Color3.fromRGB(22, 23, 27)
-    TextBox.BorderSizePixel = 0
-    TextBox.Position = UDim2.new(0.95, 0, 0.5, 0)
-    TextBox.Size = UDim2.new(0, 120, 0, 27)
-    TextBox.ClearTextOnFocus = false
-    TextBox.Text = ""
-    TextBox.PlaceholderText = "Enter Value"
-    TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-    TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TextBox.TextSize = 14
-    TextBox.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
-    TextBox.TextXAlignment = Enum.TextXAlignment.Center
-    TextBox.ClipsDescendants = true
+TextBox.Name = "InputBox"
+TextBox.Parent = inputButton
+TextBox.AnchorPoint = Vector2.new(1, 0.5)
+TextBox.BackgroundColor3 = Color3.fromRGB(22, 23, 27)
+TextBox.BorderSizePixel = 0
+TextBox.Position = UDim2.new(0.95, 0, 0.5, 0)
+TextBox.Size = UDim2.new(0, 120, 0, 27)
+TextBox.ClearTextOnFocus = false
+TextBox.Text = ""
+TextBox.PlaceholderText = "Enter Value"
+TextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextSize = 14
+TextBox.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
+TextBox.TextXAlignment = Enum.TextXAlignment.Center
+TextBox.ClipsDescendants = true
+TextBox.Active = true
+TextBox.ZIndex = 3
 
     local UICorner_2 = Instance.new("UICorner")
     UICorner_2.CornerRadius = UDim.new(0, 4)
     UICorner_2.Parent = TextBox
-
+--vuk fixed here
     TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-        Library.Flags[self.flag] = TextBox.Text
-        Library.save_flags()
-    end)
-end
+    Library.Flags[self.flag] = TextBox.Text
+    Library.save_flags()
+end)
+
+inputButton.MouseButton1Click:Connect(function()
+    TextBox:CaptureFocus()
+end)
        function Module:create_keybind()
     local section = self.section == 'left' and left_section
     local keybind = Instance.new("TextButton")
