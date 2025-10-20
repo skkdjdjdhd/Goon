@@ -1362,9 +1362,7 @@ function Module:create_multidropdown()
         return t
     end
 
-
-
-    Dropdown.open = function(self)
+    function Dropdown:open()
         open = true
        
         self.oldSelectedOptions = copyTable(self.selectedOptions)
@@ -1382,11 +1380,10 @@ function Module:create_multidropdown()
             Rotation = 180
         }):Play()
 
-
-        self.update(self)
+        Dropdown:update(self)
     end
 
-    Dropdown.close = function(self)
+    function Dropdown:close()
         open = false
 
         if not self.selectionChanged then
@@ -1413,7 +1410,7 @@ function Module:create_multidropdown()
         }):Play()
     end
 
-    Dropdown.clear = function(self)
+    function Dropdown:clear()
         for _, object in Options:GetChildren() do
             if object.Name ~= "Option" then
                 continue
@@ -1422,8 +1419,8 @@ function Module:create_multidropdown()
         end
     end
 
-    Dropdown.update = function(self)
-    Dropdown.clear(self)
+    function Dropdown:update()
+        Dropdown.clear(self)
 
         list_size = 0
         for _, value in ipairs(self.options) do
@@ -1489,34 +1486,6 @@ function Module:create_multidropdown()
     Dropdown.flag = self.flag
     Dropdown.callback = self.callback
 
-
-    Dropdown.SetOption = function(self, newOptions, selectedValues)
-        if type(newOptions) == "table" then
-            self.options = newOptions
-        end
-        
-        if selectedValues and type(selectedValues) == "table" then
-            self.selectedOptions = {}
-            for _, value in ipairs(selectedValues) do
-                if table.find(self.options, value) then
-                    table.insert(self.selectedOptions, value)
-                end
-            end
-            
-            if next(self.selectedOptions) then
-                TextLabel.Text = table.concat(self.selectedOptions, ", ")
-            else
-                TextLabel.Text = self.name
-            end
-            
-            Library.Flags[self.flag] = self.selectedOptions
-            self.callback(self.selectedOptions)
-        end
-        
-        self.update(self)
-        Library.save_flags()
-    end
-
     Dropdown:update()
 
     dropdown.MouseButton1Click:Connect(function()
@@ -1543,6 +1512,44 @@ function Module:create_multidropdown()
         end
     end
 end)
+
+    function Dropdown:SetOption(newOptions, selectedValues)
+    if type(newOptions) == "table" then
+        self.options = newOptions
+    end
+    
+    local validSelections = {}
+    
+    if selectedValues and type(selectedValues) == "table" then
+        for _, value in ipairs(selectedValues) do
+            if table.find(self.options, value) then
+                table.insert(validSelections, value)
+            end
+        end
+    end
+    
+    if type(self.selectedOptions) == "table" then
+        for _, value in ipairs(self.selectedOptions) do
+            if table.find(self.options, value) and not table.find(validSelections, value) then
+                table.insert(validSelections, value)
+            end
+        end
+    end
+    
+    self.selectedOptions = validSelections
+    
+    if next(self.selectedOptions) then
+        TextLabel.Text = table.concat(self.selectedOptions, ", ")
+    else
+        TextLabel.Text = self.name
+    end
+    
+    Library.Flags[self.flag] = self.selectedOptions
+    self.callback(self.selectedOptions)
+    
+    self:update()
+    Library.save_flags()
+end
 
     return Dropdown
 end
@@ -1680,8 +1687,7 @@ function Module.create_dropdown(self)
 
     Dropdown.selectedOption = nil -- текущий выбор
 
-
-    Dropdown.open = function(self)
+    function Dropdown:open()
         open = true
 
         TweenService:Create(Options, TweenInfo.new(0.4), {
@@ -1697,8 +1703,7 @@ function Module.create_dropdown(self)
         }):Play()
     end
 
-
-    Dropdown.close = function(self)
+    function Dropdown:close()
         open = false
 
         TweenService:Create(Options, TweenInfo.new(0.4), {
@@ -1714,16 +1719,16 @@ function Module.create_dropdown(self)
         }):Play()
     end
 
-
-    Dropdown.clear = function(self)
+    function Dropdown:clear()
         for _, object in Options:GetChildren() do
             if object.Name ~= "Option" then continue end
             object:Destroy()
         end
     end
 
-    Dropdown.update = function(self)
-    Dropdown.clear(self)
+    function Dropdown:update()
+        Dropdown.clear(self)
+
         list_size = 0
         for _, value in ipairs(self.options) do
             list_size += OPTION_HEIGHT
@@ -1759,31 +1764,12 @@ function Module.create_dropdown(self)
                 Library.Flags[self.flag] = value
                 self.callback(value)
                 Library.save_flags()
-                Dropdown.update(self)
-                Dropdown.close(self)
+                Dropdown:update(self)
+                Dropdown:close()
             end)
         end
     end
--- vuk was here
-Dropdown.SetOption = function(self, newOptions, selectedValue)
-    if type(newOptions) == "table" then
-        self.options = newOptions
-    end
-    
-    if selectedValue and table.find(self.options, selectedValue) then
-        self.selectedOption = selectedValue
-        TextLabel.Text = selectedValue
-        Library.Flags[self.flag] = selectedValue
-        self.callback(selectedValue)
-    elseif selectedValue then
-        warn("Selected value '" .. tostring(selectedValue) .. "' not found in options")
-    end
-    
 
-    self.update(self)
-    Library.save_flags()
-end
-    -- Инициализируем с пустым выбором
     Dropdown.selectedOption = nil
     TextLabel.Text = self.name
 
@@ -1801,6 +1787,24 @@ end
             Dropdown:close()
         end
     end)
+
+    function Dropdown:SetOption(newOptions, selectedValue)
+        if type(newOptions) == "table" then
+            self.options = newOptions
+        end
+        
+        if selectedValue and table.find(self.options, selectedValue) then
+            self.selectedOption = selectedValue
+            TextLabel.Text = selectedValue
+            Library.Flags[self.flag] = selectedValue
+            self.callback(selectedValue)
+        elseif selectedValue then
+            warn("Selected value '" .. tostring(selectedValue) .. "' not found in options")
+        end
+        
+        self:update()
+        Library.save_flags()
+    end
 
     return Dropdown
 end
