@@ -1518,25 +1518,11 @@ end)
         self.options = newOptions
     end
     
-    local validSelections = {}
+    self.selectedOptions = {}
     
-    if selectedValues and type(selectedValues) == "table" then
-        for _, value in ipairs(selectedValues) do
-            if table.find(self.options, value) then
-                table.insert(validSelections, value)
-            end
-        end
+    if self.options and #self.options > 0 and self.options[1] ~= "No Tools Available" then
+        table.insert(self.selectedOptions, self.options[1])
     end
-    
-    if type(self.selectedOptions) == "table" then
-        for _, value in ipairs(self.selectedOptions) do
-            if table.find(self.options, value) and not table.find(validSelections, value) then
-                table.insert(validSelections, value)
-            end
-        end
-    end
-    
-    self.selectedOptions = validSelections
     
     if next(self.selectedOptions) then
         TextLabel.Text = table.concat(self.selectedOptions, ", ")
@@ -1550,7 +1536,6 @@ end)
     self:update()
     Library.save_flags()
 end
-
     return Dropdown
 end
 
