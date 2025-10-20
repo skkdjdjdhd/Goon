@@ -1485,6 +1485,7 @@ function Module:create_multidropdown()
     Dropdown.options = self.options
     Dropdown.flag = self.flag
     Dropdown.callback = self.callback
+    Dropdown.placeholders = self.placeholders or {}
 
     Dropdown:update()
 
@@ -1514,28 +1515,44 @@ function Module:create_multidropdown()
 end)
 
     function Dropdown:SetOption(newOptions, selectedValues)
-    if type(newOptions) == "table" then
-        self.options = newOptions
+        if type(newOptions) == "table" then
+            self.options = newOptions
+        end
+        
+        self.selectedOptions = {}
+        
+        local hasValidOptions = false
+        for _, option in ipairs(self.options) do
+            local isPlaceholder = false
+            
+            if self.placeholders and type(self.placeholders) == "table" then
+                for _, placeholder in ipairs(self.placeholders) do
+                    if option == placeholder then
+                        isPlaceholder = true
+                        break
+                    end
+                end
+            end
+            
+            if not isPlaceholder then
+                hasValidOptions = true
+                table.insert(self.selectedOptions, option)
+                break
+            end
+        end
+        
+        if next(self.selectedOptions) then
+            TextLabel.Text = table.concat(self.selectedOptions, ", ")
+        else
+            TextLabel.Text = self.name
+        end
+        
+        Library.Flags[self.flag] = self.selectedOptions
+        self.callback(self.selectedOptions)
+        
+        self:update()
+        Library.save_flags()
     end
-    
-    self.selectedOptions = {}
-    
-    if self.options and #self.options > 0 and self.options[1] ~= "No Tools Available" then
-        table.insert(self.selectedOptions, self.options[1])
-    end
-    
-    if next(self.selectedOptions) then
-        TextLabel.Text = table.concat(self.selectedOptions, ", ")
-    else
-        TextLabel.Text = self.name
-    end
-    
-    Library.Flags[self.flag] = self.selectedOptions
-    self.callback(self.selectedOptions)
-    
-    self:update()
-    Library.save_flags()
-end
     return Dropdown
 end
 
