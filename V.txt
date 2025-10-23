@@ -2076,13 +2076,37 @@ end
 end)
 
         end
-          function Module:create_savemanager(foldername)
+function Module:create_savemanager(foldername)
+    local section = self.section == 'left' and left_section or right_section
     
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.AnchorPoint = Vector2.new(0, 0.5)
+    title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    title.BorderSizePixel = 0
+    title.Position = UDim2.new(0, 0, 0.14, 0) 
+    title.Size = UDim2.new(.96, 0, 0, 15) 
+    title.ZIndex = 2
+    title.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextScaled = true
+    title.TextSize = 14
+    title.TextWrapped = true
+    title.Parent = section
+    title.Text = "Configuration Manager"
+    title.TextXAlignment = Enum.TextXAlignment.Left
+
+    local padding = Instance.new("UIPadding")
+    padding.Parent = title
+    padding.PaddingLeft = UDim.new(0, 8)
     
     -- Dropdown for saved files
     local savedFilesDropdown = Module.create_dropdown({
         name = "Select Config",
-        section = "left",
+        section = self.section or "left",
         options = Library:get_saved_files(foldername),
         flag = "selected_config",
         callback = function(value) end
@@ -2091,19 +2115,21 @@ end)
     -- Input for filename
     Module.create_input({
         name = "Config Name",
-        section = "left",
+        section = self.section or "left",
         flag = "config_name_input"
     })
     
     -- Create Save button
     Module.create_button({
         name = "Create Save File",
-        section = "left",
+        section = self.section or "left",
         callback = function()
             local filename = Library.Flags["config_name_input"]
-            if Library:save_config(foldername, filename) then
-                local files = Library:get_saved_files(foldername)
-                savedFilesDropdown:SetOption(files, filename)
+            if filename and filename ~= "" then
+                if Library:save_config(foldername, filename) then
+                    local files = Library:get_saved_files(foldername)
+                    savedFilesDropdown:SetOption(files, filename)
+                end
             end
         end
     })
@@ -2111,11 +2137,11 @@ end)
     -- Load Save button
     Module.create_button({
         name = "Load Save File",
-        section = "left",
+        section = self.section or "left",
         callback = function()
             local filename = Library.Flags["selected_config"]
-            if Library:load_config(foldername, filename) then
-                -- Configuration loaded successfully
+            if filename and filename ~= "" then
+                Library:load_config(foldername, filename)
             end
         end
     })
@@ -2123,17 +2149,19 @@ end)
     -- Set Auto Exec button
     Module.create_button({
         name = "Set Auto Execute",
-        section = "left",
+        section = self.section or "left",
         callback = function()
             local filename = Library.Flags["selected_config"]
-            Library:set_autoexec(foldername, filename)
+            if filename and filename ~= "" then
+                Library:set_autoexec(foldername, filename)
+            end
         end
     })
     
     -- Remove Auto Exec button
     Module.create_button({
         name = "Remove Auto Execute",
-        section = "left",
+        section = self.section or "left",
         callback = function()
             Library:remove_autoexec(foldername)
         end
@@ -2145,8 +2173,6 @@ end)
         Library:load_config(foldername, autoexec_file)
     end
 end
-            return Module
-        end
         return Tab
     end
 
