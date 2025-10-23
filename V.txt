@@ -2077,80 +2077,80 @@ end)
 
         end
           function Module:create_savemanager(foldername)
-                local section = self.section == 'left' and left_section
-                
-                -- Title
-                Module.create_title({
-                    name = "Configuration Manager",
-                    section = self.section
-                })
-                
-                -- Dropdown for saved files
-                local savedFilesDropdown = Module.create_dropdown({
-                    name = "Select Config",
-                    section = self.section,
-                    options = Library:get_saved_files(foldername),
-                    flag = "selected_config",
-                    callback = function(value) end
-                })
-                
-                -- Input for filename
-                Module.create_input({
-                    name = "Config Name",
-                    section = self.section,
-                    flag = "config_name_input"
-                })
-                
-                -- Create Save button
-                Module.create_button({
-                    name = "Create Save File",
-                    section = self.section,
-                    callback = function()
-                        local filename = Library.Flags["config_name_input"]
-                        if Library:save_config(foldername, filename) then
-                            local files = Library:get_saved_files(foldername)
-                            savedFilesDropdown:SetOption(files, filename)
-                        end
-                    end
-                })
-                
-                -- Load Save button
-                Module.create_button({
-                    name = "Load Save File",
-                    section = self.section,
-                    callback = function()
-                        local filename = Library.Flags["selected_config"]
-                        if Library:load_config(foldername, filename) then
-                            -- Configuration loaded successfully
-                        end
-                    end
-                })
-                
-                -- Set Auto Exec button
-                Module.create_button({
-                    name = "Set Auto Execute",
-                    section = self.section,
-                    callback = function()
-                        local filename = Library.Flags["selected_config"]
-                        Library:set_autoexec(foldername, filename)
-                    end
-                })
-                
-                -- Remove Auto Exec button
-                Module.create_button({
-                    name = "Remove Auto Execute",
-                    section = self.section,
-                    callback = function()
-                        Library:remove_autoexec(foldername)
-                    end
-                })
-                
-                -- Auto-load autoexec on startup
-                local autoexec_file = Library:get_autoexec(foldername)
-                if autoexec_file then
-                    Library:load_config(foldername, autoexec_file)
-                end
+    local section = left_section
+    
+    -- Title
+    Module:create_title({
+        name = "Configuration Manager",
+        section = "left"
+    })
+    
+    -- Dropdown for saved files
+    local savedFilesDropdown = Module:create_dropdown({
+        name = "Select Config",
+        section = "left",
+        options = Library:get_saved_files(foldername),
+        flag = "selected_config",
+        callback = function(value) end
+    })
+    
+    -- Input for filename
+    Module:create_input({
+        name = "Config Name",
+        section = "left",
+        flag = "config_name_input"
+    })
+    
+    -- Create Save button
+    Module:create_button({
+        name = "Create Save File",
+        section = "left",
+        callback = function()
+            local filename = Library.Flags["config_name_input"]
+            if Library:save_config(foldername, filename) then
+                local files = Library:get_saved_files(foldername)
+                savedFilesDropdown:SetOption(files, filename)
             end
+        end
+    })
+    
+    -- Load Save button
+    Module:create_button({
+        name = "Load Save File",
+        section = "left",
+        callback = function()
+            local filename = Library.Flags["selected_config"]
+            if Library:load_config(foldername, filename) then
+                -- Configuration loaded successfully
+            end
+        end
+    })
+    
+    -- Set Auto Exec button
+    Module:create_button({
+        name = "Set Auto Execute",
+        section = "left",
+        callback = function()
+            local filename = Library.Flags["selected_config"]
+            Library:set_autoexec(foldername, filename)
+        end
+    })
+    
+    -- Remove Auto Exec button
+    Module:create_button({
+        name = "Remove Auto Execute",
+        section = "left",
+        callback = function()
+            Library:remove_autoexec(foldername)
+        end
+    })
+    
+    -- Auto-load autoexec on startup
+    local autoexec_file = Library:get_autoexec(foldername)
+    if autoexec_file then
+        Library:load_config(foldername, autoexec_file)
+    end
+end
             return Module
         end
         return Tab
