@@ -2076,7 +2076,7 @@ end
 end)
 
         end
-function Module:create_savemanager(foldername)
+        function Module:create_savemanager(foldername)
     local section = self.section == 'left' and left_section or right_section
     
     -- Title
@@ -2173,6 +2173,8 @@ function Module:create_savemanager(foldername)
         Library:load_config(foldername, autoexec_file)
     end
 end
+            return Module
+        end
         return Tab
     end
 
