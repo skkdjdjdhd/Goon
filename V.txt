@@ -2077,16 +2077,14 @@ end)
 
         end
           function Module:create_savemanager(foldername)
-    local section = left_section
-    
     -- Title
-    Module:create_title({
+    Module.create_title({
         name = "Configuration Manager",
         section = "left"
     })
     
     -- Dropdown for saved files
-    local savedFilesDropdown = Module:create_dropdown({
+    local savedFilesDropdown = Module.create_dropdown({
         name = "Select Config",
         section = "left",
         options = Library:get_saved_files(foldername),
@@ -2095,14 +2093,14 @@ end)
     })
     
     -- Input for filename
-    Module:create_input({
+    Module.create_input({
         name = "Config Name",
         section = "left",
         flag = "config_name_input"
     })
     
     -- Create Save button
-    Module:create_button({
+    Module.create_button({
         name = "Create Save File",
         section = "left",
         callback = function()
@@ -2115,7 +2113,7 @@ end)
     })
     
     -- Load Save button
-    Module:create_button({
+    Module.create_button({
         name = "Load Save File",
         section = "left",
         callback = function()
@@ -2127,7 +2125,7 @@ end)
     })
     
     -- Set Auto Exec button
-    Module:create_button({
+    Module.create_button({
         name = "Set Auto Execute",
         section = "left",
         callback = function()
@@ -2137,7 +2135,7 @@ end)
     })
     
     -- Remove Auto Exec button
-    Module:create_button({
+    Module.create_button({
         name = "Remove Auto Execute",
         section = "left",
         callback = function()
