@@ -2077,11 +2077,7 @@ end)
 
         end
           function Module:create_savemanager(foldername)
-    -- Title
-    Module.create_title({
-        name = "Configuration Manager",
-        section = "left"
-    })
+    
     
     -- Dropdown for saved files
     local savedFilesDropdown = Module.create_dropdown({
