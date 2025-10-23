@@ -2100,12 +2100,7 @@ function Module:create_save_manager(options)
         options = get_configs(),
         flag = "selected_config",
         callback = function() end
-    })
-    self:create_input({
-        name = "Config Name",
-        section = section,
-        flag = "config_name",
-    })
+    }) 
     self:create_button({
         name = "Create Config",
         section = section,
