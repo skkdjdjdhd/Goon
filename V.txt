@@ -21,6 +21,7 @@ local Library = {
     dragging = false;
     drag_position = nil;
     start_position = nil;
+    elements = {};
 }
 
 
@@ -52,98 +53,92 @@ function Library:exist()
 end
 
 function Library:save_flags()
-    if not Library.exist() then return end
-
     local flags = HttpService:JSONEncode(Library.Flags)
-    --writefile(`cac hub/{game.GameId}.lua`, flags)
+    local folder = "Moondiety"
+    local ext = ".json"
+    if not isfolder(folder) then makefolder(folder) end
+    writefile(folder .. "/" .. game.GameId .. ext, flags)
 end
 
 function Library:load_flags()
-   -- if not isfile(`cac hub/{game.GameId}.lua`) then Library.save_flags() return end
+    local folder = "Moondiety"
+    local ext = ".json"
+    if not isfolder(folder) then makefolder(folder) end
+    local autofile = folder .. "/autoexec" .. ext
+    if isfile(autofile) then
+        local flags = readfile(autofile)
+        if flags then
+            Library.Flags = HttpService:JSONDecode(flags)
+        end
+    else
+        local defaultfile = folder .. "/" .. game.GameId .. ext
+        if isfile(defaultfile) then
+            local flags = readfile(defaultfile)
+            if flags then
+                Library.Flags = HttpService:JSONDecode(flags)
+            end
+        end
+    end
+end
 
-   -- local flags = readfile(`cac hub/{game.GameId}.lua`)
-    --if not flags then Library.save_flags() return end
-
-  --  Library.Flags = HttpService:JSONDecode(flags)
+function Library:update_all()
+    for _, elem in ipairs(self.elements) do
+        local flag = elem.flag
+        local value = Library.Flags[flag]
+        if value == nil then continue end
+        if elem.type == "toggle" then
+            local checkbox = elem.object.Checkbox
+            if value then
+                TweenService:Create(checkbox.Fill, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+                TweenService:Create(checkbox.Glow, TweenInfo.new(0.4), {ImageTransparency = 0}):Play()
+            else
+                TweenService:Create(checkbox.Fill, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+                TweenService:Create(checkbox.Glow, TweenInfo.new(0.4), {ImageTransparency = 1}):Play()
+            end
+        elseif elem.type == "slider" then
+            local min = elem.min or 0
+            local max = elem.max or 100
+            local result = math.clamp((value - min) / (max - min), 0, 1)
+            local slider_size = math.clamp(result, 0.001, 0.999)
+            elem.object.Box.Fill.UIGradient.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(slider_size, 0),
+                NumberSequenceKeypoint.new(math.min(slider_size + 0.001, 1), 1),
+                NumberSequenceKeypoint.new(1, 1)
+            })
+            elem.object.Box.Glow.UIGradient.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(slider_size, 0),
+                NumberSequenceKeypoint.new(math.min(slider_size + 0.03, 1), 1),
+                NumberSequenceKeypoint.new(1, 1)
+            })
+            elem.object.Number.Text = value
+        elseif elem.type == "dropdown" then
+            elem.dropdown.selectedOption = value
+            elem.object.TextLabel.Text = value or elem.dropdown.name
+            elem.dropdown:update()
+        elseif elem.type == "multidropdown" then
+            elem.dropdown.selectedOptions = value
+            if next(value) then
+                elem.object.TextLabel.Text = table.concat(value, ", ")
+            else
+                elem.object.TextLabel.Text = elem.dropdown.name
+            end
+            elem.dropdown:update()
+        elseif elem.type == "keybind" then
+            elem.object.Box.TextLabel.Text = value
+            local textWidth = elem.object.Box.TextLabel.TextBounds.X
+            local PADDING_X = 15
+            elem.object.Box.Size = UDim2.new(0, textWidth + PADDING_X, 0, elem.object.Box.Size.Y.Offset)
+        elseif elem.type == "input" then
+            elem.object.Text = value
+        end
+    end
 end
 
 Library.load_flags()
 Library.clear()
 
-function Library:create_save_folder(foldername)
-    local folder_path = `cac hub/{game.GameId}/{foldername or "Default"}`
-    if not isfolder(folder_path) then
-        makefolder(folder_path)
-    end
-    return folder_path
-end
-
-function Library:save_config(foldername, filename)
-    if not filename or filename == "" then return false end
-    local folder_path = Library.create_save_folder(self, foldername)
-    local file_path = `{folder_path}/{filename}.json`
-    local flags = HttpService:JSONEncode(Library.Flags)
-    writefile(file_path, flags)
-    return true
-end
-
-function Library:load_config(foldername, filename)
-    if not filename or filename == "" then return false end
-    local folder_path = Library.create_save_folder(self, foldername)
-    local file_path = `{folder_path}/{filename}.json`
-    
-    if not isfile(file_path) then return false end
-    
-    local flags = readfile(file_path)
-    if not flags then return false end
-    
-    Library.Flags = HttpService:JSONDecode(flags)
-    return true
-end
-
-function Library:get_saved_files(foldername)
-    local folder_path = Library.create_save_folder(self, foldername)
-    if not isfolder(folder_path) then return {} end
-    
-    local files = listfiles(folder_path)
-    local file_names = {}
-    
-    for _, file in ipairs(files) do
-        local name = file:match("([^/\\]+)%.json$")
-        if name then
-            table.insert(file_names, name)
-        end
-    end
-    
-    return file_names
-end
-
-function Library:set_autoexec(foldername, filename)
-    if not filename or filename == "" then return false end
-    local folder_path = Library.create_save_folder(self, foldername)
-    local autoexec_path = `{folder_path}/autoexec.txt`
-    writefile(autoexec_path, filename)
-    return true
-end
-
-function Library:get_autoexec(foldername)
-    local folder_path = Library.create_save_folder(self, foldername)
-    local autoexec_path = `{folder_path}/autoexec.txt`
-    
-    if not isfile(autoexec_path) then return nil end
-    return readfile(autoexec_path)
-end
-
-function Library:remove_autoexec(foldername)
-    local folder_path = Library.create_save_folder(self, foldername)
-    local autoexec_path = `{folder_path}/autoexec.txt`
-    
-    if isfile(autoexec_path) then
-        delfile(autoexec_path)
-        return true
-    end
-    return false
-end
 
 function Library:open()
     self.Container.Visible = true
@@ -153,8 +148,10 @@ function Library:open()
     local containerSize, shadowSize
     if UserInputService.TouchEnabled then
         containerSize = UDim2.new(0.7, 0, 0.9, 0)
+        shadowSize = UDim2.new(0.71, 0, 0.91, 0)
     else
         containerSize = UDim2.new(0.35, 0, 0.35, 0)
+        shadowSize = UDim2.new(0.4, 0, 0.4, 0)
     end
 
     TweenService:Create(self.Container, TweenInfo.new(0.6, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
@@ -187,7 +184,7 @@ function Library:close()
     end)
 end
 
-function Library:drag()
+function Library.drag(data)
     if not Library.drag_position then
         return
     end
@@ -196,14 +193,14 @@ function Library:drag()
         return
     end
     
-    local delta = self.input.Position - Library.drag_position
+    local delta = data.input.Position - Library.drag_position
     local position = UDim2.new(Library.start_position.X.Scale, Library.start_position.X.Offset + delta.X, Library.start_position.Y.Scale, Library.start_position.Y.Offset + delta.Y)
 
-    TweenService:Create(self.container.Container, TweenInfo.new(0.2), {
+    TweenService:Create(data.container.Container, TweenInfo.new(0.2), {
         Position = position
     }):Play()
 
-    TweenService:Create(self.container.Shadow, TweenInfo.new(0.2), {
+    TweenService:Create(data.container.Shadow, TweenInfo.new(0.2), {
         Position = position
     }):Play()
 end
@@ -212,9 +209,9 @@ function Library:visible()
     Library.enabled = not Library.enabled
 
     if Library.enabled then
-        Library.open(self)
+        Library:open()
     else
-        Library.close(self)
+        Library:close()
     end
 end
 
@@ -448,17 +445,17 @@ local isSettingKeybind = false
 UserInputService.InputBegan:Connect(function(input, process)
     if process then return end
     if isSettingKeybind then return end
-    if not Library.exist() then return end
+    if not Library:exist() then return end
 
     local chosenKey = Library.Flags.toggleui or "H"
     if input.KeyCode == Enum.KeyCode[chosenKey] then
-        Library.visible(container)
+        Library:visible()
     end
 end)
 
 
     mobile_button.MouseButton1Click:Connect(function()
-        Library.visible(container)
+        Library:visible()
     end)
 
     local Tab = {}
@@ -734,7 +731,7 @@ end)
             if self.state then
                 Module.enable_toggle(self.toggle)
             else
-                Module.disable_toggle(self.toggle)
+                Module:disable_toggle(self.toggle)
             end
         end
 
@@ -837,14 +834,13 @@ end)
             TextLabel.TextXAlignment = Enum.TextXAlignment.Left
             TextLabel.Text = self.name
 
-            Library.Flags[self.flag] = false
-
-            self.callback(false)
-
+            Library.Flags[self.flag] = Library.Flags[self.flag] or false
+            self.callback(Library.Flags[self.flag])
             Module.update_toggle({
-                state = false,
+                state = Library.Flags[self.flag],
                 toggle = toggle
             })
+            table.insert(Library.elements, {type = "toggle", object = toggle, flag = self.flag})
 
 
             toggle.MouseButton1Click:Connect(function()
@@ -918,10 +914,12 @@ end)
     UICorner_2.CornerRadius = UDim.new(0, 4)
     UICorner_2.Parent = TextBox
 
-    TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-        Library.Flags[self.flag] = TextBox.Text
-        Library.save_flags()
-    end)
+    TextBox.Text = Library.Flags[self.flag] or ""
+TextBox.FocusLost:Connect(function()
+    Library.Flags[self.flag] = TextBox.Text
+    Library.save_flags()
+end)
+table.insert(Library.elements, {type = "input", object = TextBox, flag = self.flag})
 end
        function Module:create_keybind()
     local section = self.section == 'left' and left_section
@@ -994,6 +992,7 @@ end
 
     TextLabel_2:GetPropertyChangedSignal("Text"):Connect(updateKeybindSize)
     updateKeybindSize()
+table.insert(Library.elements, {type = "keybind", object = keybind, flag = self.flag})
 
     keybind.MouseButton1Click:Connect(function()
         isSettingKeybind = true
@@ -1272,6 +1271,7 @@ end
 
     slider.Number.Text = Library.Flags[self.flag]
     self.callback(Library.Flags[self.flag])
+table.insert(Library.elements, {type = "slider", object = slider, flag = self.flag, min = self.minimum_value, max = self.maximum_value})
 
     slider.Box.Hitbox.MouseButton1Down:Connect(function()
         if Library.slider_drag then return end
@@ -1561,7 +1561,8 @@ function Module:create_multidropdown()
     Dropdown.callback = self.callback
     Dropdown.placeholders = self.placeholders or {}
 
-    Dropdown:update()
+    Dropdown:update(self)
+table.insert(Library.elements, {type = "multidropdown", object = Box, flag = self.flag, dropdown = Dropdown})
 
     dropdown.MouseButton1Click:Connect(function()
     if not UserInputService.TouchEnabled then
@@ -1854,6 +1855,7 @@ function Module.create_dropdown(self)
     Dropdown.callback = self.callback
 
     Dropdown:update()
+table.insert(Library.elements, {type = "dropdown", object = Box, flag = self.flag, dropdown = Dropdown})
 
     dropdown.MouseButton1Click:Connect(function()
         open = not open
@@ -2075,107 +2077,83 @@ end
     end)
 end)
 
-        end
-        function Module:create_savemanager(foldername)
-    local section = self.section == 'left' and left_section or right_section
-    
-    -- Title
-    local title = Instance.new("TextLabel")
-    title.Name = "Title"
-    title.AnchorPoint = Vector2.new(0, 0.5)
-    title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    title.BackgroundTransparency = 1
-    title.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    title.BorderSizePixel = 0
-    title.Position = UDim2.new(0, 0, 0.14, 0) 
-    title.Size = UDim2.new(.96, 0, 0, 15) 
-    title.ZIndex = 2
-    title.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    title.TextScaled = true
-    title.TextSize = 14
-    title.TextWrapped = true
-    title.Parent = section
-    title.Text = "Configuration Manager"
-    title.TextXAlignment = Enum.TextXAlignment.Left
-
-    local padding = Instance.new("UIPadding")
-    padding.Parent = title
-    padding.PaddingLeft = UDim.new(0, 8)
-    
-    -- Dropdown for saved files
-    local savedFilesDropdown = Module.create_dropdown({
-        name = "Select Config",
-        section = self.section or "left",
-        options = Library:get_saved_files(foldername),
-        flag = "selected_config",
-        callback = function(value) end
-    })
-    
-    -- Input for filename
-    Module.create_input({
-        name = "Config Name",
-        section = self.section or "left",
-        flag = "config_name_input"
-    })
-    
-    -- Create Save button
-    Module.create_button({
-        name = "Create Save File",
-        section = self.section or "left",
-        callback = function()
-            local filename = Library.Flags["config_name_input"]
-            if filename and filename ~= "" then
-                if Library:save_config(foldername, filename) then
-                    local files = Library:get_saved_files(foldername)
-                    savedFilesDropdown:SetOption(files, filename)
-                end
+            end
+function Module:create_save_manager(options)
+    options = options or {}
+    local section = options.section or 'left'
+    local folder = "Moondiety"
+    local ext = ".json"
+    if not isfolder(folder) then makefolder(folder) end
+    local function get_configs()
+        local configs = {}
+        for _, file in ipairs(listfiles(folder)) do
+            if file:find(ext .. "$") then
+                table.insert(configs, file:gsub(folder .. "/", ""):gsub(ext, ""))
             end
         end
-    })
-    
-    -- Load Save button
-    Module.create_button({
-        name = "Load Save File",
-        section = self.section or "left",
-        callback = function()
-            local filename = Library.Flags["selected_config"]
-            if filename and filename ~= "" then
-                Library:load_config(foldername, filename)
-            end
-        end
-    })
-    
-    -- Set Auto Exec button
-    Module.create_button({
-        name = "Set Auto Execute",
-        section = self.section or "left",
-        callback = function()
-            local filename = Library.Flags["selected_config"]
-            if filename and filename ~= "" then
-                Library:set_autoexec(foldername, filename)
-            end
-        end
-    })
-    
-    -- Remove Auto Exec button
-    Module.create_button({
-        name = "Remove Auto Execute",
-        section = self.section or "left",
-        callback = function()
-            Library:remove_autoexec(foldername)
-        end
-    })
-    
-    -- Auto-load autoexec on startup
-    local autoexec_file = Library:get_autoexec(foldername)
-    if autoexec_file then
-        Library:load_config(foldername, autoexec_file)
+        return configs
     end
-end
-            return Module
+    self:create_title({name = "Save Manager", section = section})
+    local dd = self:create_dropdown({
+        name = "Configs",
+        section = section,
+        options = get_configs(),
+        flag = "selected_config",
+        callback = function() end
+    })
+    self:create_input({
+        name = "Config Name",
+        section = section,
+        flag = "config_name",
+    })
+    self:create_button({
+        name = "Create Config",
+        section = section,
+        callback = function()
+            local name = Library.Flags["config_name"]
+            if not name or name == "" then return end
+            writefile(folder .. "/" .. name .. ext, HttpService:JSONEncode(Library.Flags))
+            dd:SetOption(get_configs())
         end
-        return Tab
+    })
+    self:create_button({
+        name = "Load Config",
+        section = section,
+        callback = function()
+            local selected = dd.selectedOption
+            if not selected then return end
+            local file = folder .. "/" .. selected .. ext
+            if not isfile(file) then return end
+            local data = HttpService:JSONDecode(readfile(file))
+            Library.Flags = data
+            Library:update_all()
+            Library:save_flags()
+        end
+    })
+    self:create_button({
+        name = "Set Autoexec",
+        section = section,
+        callback = function()
+            local selected = dd.selectedOption
+            if not selected then return end
+            local file = folder .. "/" .. selected .. ext
+            if not isfile(file) then return end
+            local data = readfile(file)
+            writefile(folder .. "/autoexec" .. ext, data)
+        end
+    })
+    self:create_button({
+        name = "Remove Autoexec",
+        section = section,
+        callback = function()
+            local file = folder .. "/autoexec" .. ext
+            if isfile(file) then
+                delfile(file)
+            end
+        end
+    })
+end
+        return Module
     end
 
 
